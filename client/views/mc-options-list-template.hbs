@@ -1,0 +1,12 @@
+<ul>
+  {{#each responses}}
+  <li>
+    <span>
+      <input type="radio" name="answer" id={{answerID}}>
+      <label for={{answerID}}><strong>{{country}}</strong>
+        <img src={{flaglink}} class="flag-thumbnail" width="80px">
+      </label>
+    </span>
+  </li>
+  {{/each}}
+</ul>

@@ -1,0 +1,51 @@
+SELECT DISTINCT
+?country
+?countryLabel
+?population
+?flag
+?capitalLabel
+?gdp
+#?currencyLabel
+#?form_of_governmentLabel
+
+# concatenate items with commas rather than having multiple rows in table for all permutations of multivalued fields.
+(GROUP_CONCAT(distinct ?languageLabel ; separator = ", ") as ?languages)
+(GROUP_CONCAT(distinct ?form_of_governmentLabel ; separator = ", ") as ?forms_of_government)
+(GROUP_CONCAT(distinct ?currencyLabel ; separator = ", ") as ?currencies)
+# I think just palestine has two capitals. Eh, fuck it.
+WHERE {
+  {
+    # it seems I can more reliably concatenate things
+    SELECT DISTINCT
+    ?languageLabel
+    ?form_of_governmentLabel
+    ?currencyLabel
+    ?country
+    WHERE {
+      ?country wdt:P31 wd:Q6256 .
+      OPTIONAL { ?country wdt:P37 ?language . }
+      OPTIONAL { ?country wdt:P122 ?form_of_government . }
+      OPTIONAL { ?country wdt:P38 ?currency . }
+      SERVICE wikibase:label {
+        bd:serviceParam wikibase:language "en".
+        ?language rdfs:label ?languageLabel .
+        ?form_of_government rdfs:label ?form_of_governmentLabel .
+        ?currency rdfs:label ?currencyLabel .
+      }
+    } ORDER BY ?languageLabel ?form_of_governmentLabel
+  }
+
+  OPTIONAL { ?country wdt:P1082 ?population . }
+  OPTIONAL { ?country wdt:P41 ?flag. }
+  OPTIONAL { ?country wdt:P36 ?capital. }
+  OPTIONAL { ?country wdt:P2131 ?gdp. }
+  OPTIONAL { ?country wdt:P38 ?currency. }
+
+
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en".
+  }
+}
+# it seems that it must not be grouped by anything concatenated above
+GROUP BY ?country ?countryLabel ?population ?capitalLabel ?flag ?gdp
+ORDER BY ?countryLabel
